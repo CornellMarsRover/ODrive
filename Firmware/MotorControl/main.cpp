@@ -663,6 +663,8 @@ extern "C" int main(void) {
     // Load configuration from NVM. This needs to happen after system_init()
     // since the flash interface must be initialized and before board_init()
     // since board initialization can depend on the config.
+    
+    //change this to be hardcoded at startup
     size_t config_size = 0;
     bool success = config_manager.start_load()
             && config_read_all()
