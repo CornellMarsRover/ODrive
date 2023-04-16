@@ -34,7 +34,7 @@ bool CANSimple::renew_subscription(size_t i) {
     //maybe change this so the is shifted a little more 
     if (axis.config_.can.is_extended) {
         //CMR fix
-        filter.id = (uint32_t)(axis.config_.can.node_id << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS);
+        filter.id = (uint32_t)(axis.config_.can.node_id << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
         // filter.id = (uint32_t)(axis.config_.can.node_id);
     } else {
         filter.id = (uint16_t)(axis.config_.can.node_id << NUM_CMD_ID_BITS);
