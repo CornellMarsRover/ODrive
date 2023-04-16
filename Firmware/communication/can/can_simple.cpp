@@ -240,7 +240,7 @@ void CANSimple::set_axis_startup_config_callback(Axis& axis, const can_Message_t
     // axis_->motor_.config_.phase_resistance;
     // axis.motor_.config_.phase_resistance = 0.293;
     // axis.motor_.config_.phase_inductance = 0.279;
-    axis.motor_.config_.run_calibration();
+    // axis.motor_.config_.run_calibration();
 
 }
 bool CANSimple::get_encoder_estimates_callback(const Axis& axis) {

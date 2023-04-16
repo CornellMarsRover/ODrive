@@ -95,7 +95,7 @@ class CANSimple {
     // Utility functions
     static constexpr uint32_t get_node_id(uint32_t msgID) {
         // return (msgID >> NUM_CMD_ID_BITS);  // Upper 6 or more bits
-        return (msgID >> (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS) & 0x0FF)
+        return (msgID >> (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS) & 0x0FF);
     };
 
     static constexpr uint8_t get_cmd_id(uint32_t msgID) {
