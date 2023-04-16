@@ -499,6 +499,10 @@ void Encoder::sample_now() {
             // Do nothing
         } break;
 
+        case MODE_SPI_ABS_AKSIM: {
+            //20 bit version of abs_spi_start_transaction()?
+        } break;
+
         default: {
            set_error(ERROR_UNSUPPORTED_ENCODER_MODE);
         } break;
@@ -594,6 +598,10 @@ void Encoder::abs_spi_cb(bool success) {
             uint16_t rawVal = abs_spi_dma_rx_[0];
             pos = (rawVal >> 2) & 0x3fff;
         } break;
+
+        case MODE_SPI_ABS_AKSIM: {
+            //code for aksim encoder
+        }
 
         default: {
            set_error(ERROR_UNSUPPORTED_ENCODER_MODE);
@@ -732,6 +740,7 @@ bool Encoder::update() {
         case MODE_SPI_ABS_AMS:
         case MODE_SPI_ABS_CUI: 
         case MODE_SPI_ABS_AEAT:
+        case MODE_SPI_ABS_AKSIM
         case MODE_SPI_ABS_MA732: {
             if (abs_spi_pos_updated_ == false) {
                 // Low pass filter the error
