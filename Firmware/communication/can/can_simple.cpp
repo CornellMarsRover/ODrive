@@ -13,6 +13,8 @@ bool CANSimple::init() {
     return true;
 }
 
+
+//need to modify this function to take CMR_node id
 bool CANSimple::renew_subscription(size_t i) {
     Axis& axis = axes[i];
 
@@ -22,9 +24,18 @@ bool CANSimple::renew_subscription(size_t i) {
 
     MsgIdFilterSpecs filter = {
         .id = {},
-        .mask = (uint32_t)(0xffffffff << NUM_CMD_ID_BITS)};
+        //cmr can modification
+        // .mask = (uint32_t)(0xffffffff << NUM_CMD_ID_BITS)};
+
+        //only want these 8 bits
+        .mask = (uint32_t)(0xff << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS + NUM_SRC_ID_BITS))};
+
+    //CMR_comment
+    //maybe change this so the is shifted a little more 
     if (axis.config_.can.is_extended) {
-        filter.id = (uint32_t)(axis.config_.can.node_id << NUM_CMD_ID_BITS);
+        //CMR fix
+        filter.id = (uint32_t)(axis.config_.can.node_id << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS);
+        // filter.id = (uint32_t)(axis.config_.can.node_id);
     } else {
         filter.id = (uint16_t)(axis.config_.can.node_id << NUM_CMD_ID_BITS);
     }
@@ -43,7 +54,9 @@ bool CANSimple::renew_subscription(size_t i) {
 void CANSimple::handle_can_message(const can_Message_t& msg) {
     //     Frame
     // nodeID | CMD
-    // 6 bits | 5 bits
+    // 8 bits | 8 bits
+
+    //function was modified in can_simple.hhp
     uint32_t nodeID = get_node_id(msg.id);
 
     for (auto& axis : axes) {
@@ -54,7 +67,11 @@ void CANSimple::handle_can_message(const can_Message_t& msg) {
     }
 }
 
+
+//this function maps to the specific command
 void CANSimple::do_command(Axis& axis, const can_Message_t& msg) {
+    //cmr comments
+    //change this to be the specific function that is passed in which should be the first 8 bits
     const uint32_t cmd = get_cmd_id(msg.id);
     axis.watchdog_feed();
     switch (cmd) {
@@ -97,6 +114,7 @@ void CANSimple::do_command(Axis& axis, const can_Message_t& msg) {
             if (msg.rtr || msg.len == 0)
                 get_encoder_count_callback(axis);
             break;
+        //change these to match what is currently used for CMR(change can_simple.hpp enum)
         case MSG_SET_INPUT_POS:
             set_input_pos_callback(axis, msg);
             break;
@@ -166,7 +184,10 @@ void CANSimple::estop_callback(Axis& axis, const can_Message_t& msg) {
 
 bool CANSimple::get_motor_error_callback(const Axis& axis) {
     can_Message_t txmsg;
+
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+
     txmsg.id += MSG_GET_MOTOR_ERROR;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -178,7 +199,10 @@ bool CANSimple::get_motor_error_callback(const Axis& axis) {
 
 bool CANSimple::get_encoder_error_callback(const Axis& axis) {
     can_Message_t txmsg;
+
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+
     txmsg.id += MSG_GET_ENCODER_ERROR;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -190,7 +214,10 @@ bool CANSimple::get_encoder_error_callback(const Axis& axis) {
 
 bool CANSimple::get_sensorless_error_callback(const Axis& axis) {
     can_Message_t txmsg;
+
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+
     txmsg.id += MSG_GET_SENSORLESS_ERROR;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -214,7 +241,10 @@ void CANSimple::set_axis_startup_config_callback(Axis& axis, const can_Message_t
 
 bool CANSimple::get_encoder_estimates_callback(const Axis& axis) {
     can_Message_t txmsg;
+
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+
     txmsg.id += MSG_GET_ENCODER_ESTIMATES;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -227,6 +257,8 @@ bool CANSimple::get_encoder_estimates_callback(const Axis& axis) {
 
 bool CANSimple::get_sensorless_estimates_callback(const Axis& axis) {
     can_Message_t txmsg;
+    
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
     txmsg.id += MSG_GET_SENSORLESS_ESTIMATES;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
@@ -242,6 +274,8 @@ bool CANSimple::get_sensorless_estimates_callback(const Axis& axis) {
 
 bool CANSimple::get_encoder_count_callback(const Axis& axis) {
     can_Message_t txmsg;
+    
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
     txmsg.id += MSG_GET_ENCODER_COUNT;
     txmsg.isExt = axis.config_.can.is_extended;
@@ -312,6 +346,8 @@ void CANSimple::set_vel_gains_callback(Axis& axis, const can_Message_t& msg) {
 
 bool CANSimple::get_iq_callback(const Axis& axis) {
     can_Message_t txmsg;
+    
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
     txmsg.id += MSG_GET_IQ;
     txmsg.isExt = axis.config_.can.is_extended;
@@ -333,6 +369,7 @@ bool CANSimple::get_iq_callback(const Axis& axis) {
 bool CANSimple::get_vbus_voltage_callback(const Axis& axis) {
     can_Message_t txmsg;
 
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
     txmsg.id += MSG_GET_VBUS_VOLTAGE;
     txmsg.isExt = axis.config_.can.is_extended;
@@ -344,6 +381,7 @@ bool CANSimple::get_vbus_voltage_callback(const Axis& axis) {
 
     return canbus_->send_message(txmsg);
 }
+
 
 void CANSimple::clear_errors_callback(Axis& axis, const can_Message_t& msg) {
     odrv.clear_errors();  // TODO: might want to clear axis errors only
@@ -390,6 +428,8 @@ uint32_t CANSimple::service_stack() {
 
 bool CANSimple::send_heartbeat(const Axis& axis) {
     can_Message_t txmsg;
+
+    //change to CCB address
     txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
     txmsg.id += MSG_ODRIVE_HEARTBEAT;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;

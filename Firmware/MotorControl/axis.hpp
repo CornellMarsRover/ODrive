@@ -51,6 +51,10 @@ public:
     static LockinConfig_t default_sensorless();
     static LockinConfig_t default_lockin();
 
+    //CMR comments
+    //this will be were we modify the node for can
+    //this should be where
+    //this has two axis per device so need to make sure this works on both
     struct CANConfig_t {
         uint32_t node_id = 0;
         bool is_extended = false;

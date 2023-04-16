@@ -85,8 +85,12 @@ class CANSimple {
     static void clear_errors_callback(Axis& axis, const can_Message_t& msg);
     static void start_anticogging_callback(const Axis& axis, const can_Message_t& msg);
 
-    static constexpr uint8_t NUM_NODE_ID_BITS = 6;
-    static constexpr uint8_t NUM_CMD_ID_BITS = 11 - NUM_NODE_ID_BITS;
+    //CMR comments
+    //todo: change the number of NUM_NODE_ID_BITS
+    static constexpr uint8_t NUM_NODE_ID_BITS = 8;//6;
+    static constexpr uint8_t NUM_TYPE_ID_BITS = 2;
+    static constexpr uint8_t NUM_SRC_ID_BITS = 8;
+    static constexpr uint8_t NUM_CMD_ID_BITS = 8;//11 - NUM_NODE_ID_BITS;
 
     // Utility functions
     static constexpr uint32_t get_node_id(uint32_t msgID) {
@@ -94,7 +98,9 @@ class CANSimple {
     };
 
     static constexpr uint8_t get_cmd_id(uint32_t msgID) {
-        return (msgID & 0x01F);  // Bottom 5 bits
+        //CMR can fix
+        // return (msgID & 0x01F);  // Bottom 5 bits
+        return (msgID & 0x0FF);
     }
 
     CanBusBase* canbus_;
