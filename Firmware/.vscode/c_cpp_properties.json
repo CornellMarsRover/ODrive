@@ -77,7 +77,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ThirdParty/FreeRTOS/Source/portable/GCC/ARM_CM4F",
-                "${workspaceFolder}/fibre-cpp/include"
+                "${workspaceFolder}/fibre-cpp/include",
+                "/opt/homebrew/Cellar/arm-none-eabi-gcc/10.3-2021.07/gcc/arm-none-eabi/include"
             ],
             "intelliSenseMode": "gcc-arm",
             "defines": [

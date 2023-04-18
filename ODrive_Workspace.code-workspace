@@ -22,6 +22,8 @@
 	"settings": {
 		"c-cpp-flylint.cppcheck.standard": ["c99","c++14"],
 		"files.associations": {
+			"*.embeddedhtml": "html",
+			"*.mustache": "mustache",
 			"*.config": "yaml",
 			"memory": "cpp",
 			"utility": "cpp",
@@ -107,7 +109,17 @@
 			"readerwriter": "cpp",
 			"charconv": "cpp",
 			"image": "cpp",
-			"imageutils": "cpp"
+			"imageutils": "cpp",
+			"spi.h": "c",
+			"stm32f4xx_hal.h": "c",
+			"stm32f4xx_hal_conf.h": "c",
+			"stm32f4xx_hal_rcc.h": "c",
+			"stm32f4xx_hal_def.h": "c",
+			"stdio.h": "c",
+			"stm32_hal_legacy.h": "c",
+			"main.h": "c",
+			"i2c.h": "c",
+			"gpio.h": "c"
 		}
 	}
 }
