@@ -500,7 +500,7 @@ void Encoder::sample_now() {
         } break;
 
         default: {
-           set_error(ERROR_UNSUPPORTED_ENCODER_MODE);
+            set_error(ERROR_UNSUPPORTED_ENCODER_MODE);
         } break;
     }
 
@@ -566,6 +566,7 @@ void Encoder::abs_spi_cb(bool success) {
         goto done;
     }
 
+    // TODO(fad35): possible place where changes must be made
     switch (mode_) {
         case MODE_SPI_ABS_AMS: {
             uint16_t rawVal = abs_spi_dma_rx_[0];
