@@ -35,6 +35,7 @@ constexpr T can_getSignal(can_Message_t msg, const uint8_t startBit, const uint8
     if (isIntel) {
         std::memcpy(&tempVal, msg.buf, sizeof(tempVal));
         tempVal = (tempVal >> startBit) & mask;
+        // return 5;
     } else {
         std::reverse(std::begin(msg.buf), std::end(msg.buf));
         std::memcpy(&tempVal, msg.buf, sizeof(tempVal));
