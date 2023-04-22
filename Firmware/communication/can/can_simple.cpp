@@ -3,6 +3,10 @@
 
 #include <odrive_main.h>
 
+#include "autogen/interfaces.hpp" 
+
+//maybe add interfaces library
+
 bool CANSimple::init() {
     for (size_t i = 0; i < AXIS_COUNT; ++i) {
         if (!renew_subscription(i)) {
@@ -186,8 +190,12 @@ bool CANSimple::get_motor_error_callback(const Axis& axis) {
     can_Message_t txmsg;
 
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
 
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_MOTOR_ERROR;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -201,8 +209,11 @@ bool CANSimple::get_encoder_error_callback(const Axis& axis) {
     can_Message_t txmsg;
 
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
-
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_ENCODER_ERROR;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -216,8 +227,11 @@ bool CANSimple::get_sensorless_error_callback(const Axis& axis) {
     can_Message_t txmsg;
 
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
-
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_SENSORLESS_ERROR;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -242,13 +256,29 @@ void CANSimple::set_axis_startup_config_callback(Axis& axis, const can_Message_t
     // axis.motor_.config_.phase_inductance = 0.279;
     // axis.motor_.config_.run_calibration();
 
+    //start calibration
+    axis.requested_state_ = ODriveIntf::AxisIntf::AXIS_STATE_FULL_CALIBRATION_SEQUENCE;
+
+    while (axis.current_state_ != ODriveIntf::AxisIntf::AXIS_STATE_IDLE){}//AXIS_STATE_IDLE
+
+    axis.requested_state_ = ODriveIntf::AxisIntf::AXIS_STATE_CLOSED_LOOP_CONTROL;
+
+    axis.controller_.config_.control_mode = 
+                    ODriveIntf::ControllerIntf::ControlMode::CONTROL_MODE_VELOCITY_CONTROL;
+                    //CONTROL_MODE_VELOCITY_CONTROL;
+
+    axis.controller_.input_vel_ = 0;
+
 }
 bool CANSimple::get_encoder_estimates_callback(const Axis& axis) {
     can_Message_t txmsg;
 
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
-
+    //|priority|dest|type|source|function
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
     txmsg.id += MSG_GET_ENCODER_ESTIMATES;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -263,7 +293,12 @@ bool CANSimple::get_sensorless_estimates_callback(const Axis& axis) {
     can_Message_t txmsg;
     
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    //|priority|dest|type|source|function
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_SENSORLESS_ESTIMATES;  // heartbeat ID
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -280,7 +315,12 @@ bool CANSimple::get_encoder_count_callback(const Axis& axis) {
     can_Message_t txmsg;
     
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    //|priority|dest|type|source|function
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_ENCODER_COUNT;
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -352,7 +392,12 @@ bool CANSimple::get_iq_callback(const Axis& axis) {
     can_Message_t txmsg;
     
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    //|priority|dest|type|source|function
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_IQ;
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
@@ -374,7 +419,12 @@ bool CANSimple::get_vbus_voltage_callback(const Axis& axis) {
     can_Message_t txmsg;
 
     //change to CCB address
-    txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    // txmsg.id = axis.config_.can.node_id << NUM_CMD_ID_BITS;
+    //|priority|dest|type|source|function
+    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS)); 
     txmsg.id += MSG_GET_VBUS_VOLTAGE;
     txmsg.isExt = axis.config_.can.is_extended;
     txmsg.len = 8;
