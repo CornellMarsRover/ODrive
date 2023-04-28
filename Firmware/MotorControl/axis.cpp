@@ -445,7 +445,7 @@ bool Axis::run_idle_loop() {
         osDelay(1);
     }
     return check_for_errors();
-}
+}pos_setpoint
 
 // Infinite loop that does calibration and enters main control loop as appropriate
 void Axis::run_state_machine_loop() {

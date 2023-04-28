@@ -50,6 +50,7 @@ bool Stm32SpiArbiter::start() {
     } else if (task.tx_buf) {
         status = HAL_SPI_Transmit_DMA(hspi_, (uint8_t*)task.tx_buf, task.length);
     } else if (task.rx_buf) {
+        //cmr change length to be 4 for this
         status = HAL_SPI_Receive_DMA(hspi_, task.rx_buf, task.length);
     }
 

@@ -10,6 +10,7 @@ public:
     struct SpiTask {
         SPI_InitTypeDef config;
         Stm32Gpio ncs_gpio;
+        //change for arm encoder CMR 
         const uint8_t* tx_buf;
         uint8_t* rx_buf;
         size_t length;

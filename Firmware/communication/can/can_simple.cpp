@@ -257,17 +257,21 @@ void CANSimple::set_axis_startup_config_callback(Axis& axis, const can_Message_t
     // axis.motor_.config_.run_calibration();
 
     //start calibration
-    axis.requested_state_ = ODriveIntf::AxisIntf::AXIS_STATE_FULL_CALIBRATION_SEQUENCE;
+    if ( msg.buf[0] == 1 ){
+        axis.requested_state_ = ODriveIntf::AxisIntf::AXIS_STATE_FULL_CALIBRATION_SEQUENCE;
+    }
+    else {
+        axis.requested_state_ = ODriveIntf::AxisIntf::AXIS_STATE_CLOSED_LOOP_CONTROL;
 
-    while (axis.current_state_ != ODriveIntf::AxisIntf::AXIS_STATE_IDLE){}//AXIS_STATE_IDLE
+        axis.controller_.config_.control_mode = 
+                        ODriveIntf::ControllerIntf::ControlMode::CONTROL_MODE_VELOCITY_CONTROL;
+                        //CONTROL_MODE_VELOCITY_CONTROL;
 
-    axis.requested_state_ = ODriveIntf::AxisIntf::AXIS_STATE_CLOSED_LOOP_CONTROL;
+        axis.controller_.input_vel_ = 0;
+    }
+        
 
-    axis.controller_.config_.control_mode = 
-                    ODriveIntf::ControllerIntf::ControlMode::CONTROL_MODE_VELOCITY_CONTROL;
-                    //CONTROL_MODE_VELOCITY_CONTROL;
-
-    axis.controller_.input_vel_ = 0;
+    //while (axis.current_state_ != ODriveIntf::AxisIntf::AXIS_STATE_IDLE){}//AXIS_STATE_IDLE
 
 }
 bool CANSimple::get_encoder_estimates_callback(const Axis& axis) {
@@ -338,8 +342,15 @@ void CANSimple::set_input_pos_callback(Axis& axis, const can_Message_t& msg) {
 }
 
 void CANSimple::set_input_vel_callback(Axis& axis, const can_Message_t& msg) {
-    axis.controller_.input_vel_ = can_getSignal<float>(msg, 0, 32, true);
-    axis.controller_.input_torque_ = can_getSignal<float>(msg, 32, 32, true);
+    //axis.controller_.input_vel_ = can_getSignal<float>(msg, 0, 32, false);
+    uint8_t sign = (msg.buf[0] >> 7) & 0x01;
+    uint8_t velocity = msg.buf[0] & 0x7F;
+    if ( sign == 1 )
+        axis.controller_.input_vel_ = -1 * ( static_cast<float>(velocity) );
+    else
+        axis.controller_.input_vel_ = ( static_cast<float>(velocity) );
+
+    axis.controller_.input_torque_ = can_getSignal<float>(msg, 32, 32, false);
 }
 
 void CANSimple::set_input_torque_callback(Axis& axis, const can_Message_t& msg) {
