@@ -10,6 +10,10 @@
 #define CAN_CLK_HZ (42000000)
 #define CAN_CLK_MHZ (42)
 
+#define CCB  0x02
+#define NORM 0x01
+#define READ 0x03
+
 // Anonymous enum for defining the most common CAN baud rates
 enum {
     CAN_BAUD_125K = 125000,

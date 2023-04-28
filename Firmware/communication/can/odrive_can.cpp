@@ -5,6 +5,7 @@
 
 #include "freertos_vars.h"
 #include "utils.hpp"
+#include "can_simple.hpp"
 
 // Safer context handling via maps instead of arrays
 // #include <unordered_map>
@@ -129,6 +130,7 @@ bool ODriveCAN::send_message(const can_Message_t &txmsg) {
         return false;
     }
 
+    uint32_t bits = 
     CAN_TxHeaderTypeDef header;
     header.StdId = txmsg.id;
     header.ExtId = txmsg.id;

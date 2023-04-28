@@ -254,7 +254,18 @@ void CANSimple::set_axis_startup_config_callback(Axis& axis, const can_Message_t
     // axis_->motor_.config_.phase_resistance;
     // axis.motor_.config_.phase_resistance = 0.293;
     // axis.motor_.config_.phase_inductance = 0.279;
-    // axis.motor_.config_.run_calibration();
+
+    axis.requested_state_ = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+    while( axis.requested_state_ != AXIS_STATE_IDLE){
+    }
+
+    axis.requested_state_ = AXIS_STATE_CLOSED_LOOP_CONTROL
+
+    //for velocity contol
+    axis.controller_.config_.control_mode = CONTROL_MODE_VELOCITY_CONTROL
+    //for position control
+    // axis.controller_.config_.control_mode = CONTROL_MODE_POSITION_CONTROL
+
 
     //start calibration
     if ( msg.buf[0] == 1 ){
@@ -342,6 +353,7 @@ void CANSimple::set_input_pos_callback(Axis& axis, const can_Message_t& msg) {
 }
 
 void CANSimple::set_input_vel_callback(Axis& axis, const can_Message_t& msg) {
+<<<<<<< HEAD
     //axis.controller_.input_vel_ = can_getSignal<float>(msg, 0, 32, false);
     uint8_t sign = (msg.buf[0] >> 7) & 0x01;
     uint8_t velocity = msg.buf[0] & 0x7F;
@@ -351,6 +363,12 @@ void CANSimple::set_input_vel_callback(Axis& axis, const can_Message_t& msg) {
         axis.controller_.input_vel_ = ( static_cast<float>(velocity) );
 
     axis.controller_.input_torque_ = can_getSignal<float>(msg, 32, 32, false);
+=======
+    // axis.controller_.input_vel_ = can_getSignal<float>(msg, 0, 32, true);
+    int32_t velocity;
+    std::mem
+    axis.controller_.input_torque_ = can_getSignal<float>(msg, 32, 32, true);
+>>>>>>> b9038208fd2aea38d1b18a886ddbeacdc0bb1c43
 }
 
 void CANSimple::set_input_torque_callback(Axis& axis, const can_Message_t& msg) {
@@ -449,7 +467,7 @@ bool CANSimple::get_vbus_voltage_callback(const Axis& axis) {
 
 
 void CANSimple::clear_errors_callback(Axis& axis, const can_Message_t& msg) {
-    odrv.clear_errors();  // TODO: might want to clear axis errors only
+    odrv.clear_errors();
 }
 
 uint32_t CANSimple::service_stack() {
