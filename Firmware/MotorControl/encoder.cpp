@@ -42,12 +42,12 @@ void Encoder::setup() {
     spi_task_.config = {
         .Mode = SPI_MODE_MASTER,
         .Direction = SPI_DIRECTION_2LINES,
-        .DataSize = SPI_DATASIZE_16BIT,//change to 8 bit mode CMR
+        .DataSize = (mode_ == MODE_SPI_ARM)? SPI_DATASIZE_8BIT : SPI_DATASIZE_16BIT,//change to 8 bit mode CMR
         //cmr check
         .CLKPolarity = (mode_ == MODE_SPI_ABS_AEAT || mode_ == MODE_SPI_ABS_MA732) ? SPI_POLARITY_HIGH : SPI_POLARITY_LOW,
-        .CLKPhase = SPI_PHASE_2EDGE,//change to 1 edge CMR
+        .CLKPhase = (mode_ == MODE_SPI_ARM)? SPI_PHASE_1EDGE:SPI_PHASE_2EDGE,//change to 1 edge CMR
         .NSS = SPI_NSS_SOFT,
-        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16,//look at prescalar for clock
+        .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16,//look at prescalar for clock CMR
         .FirstBit = SPI_FIRSTBIT_MSB,
         .TIMode = SPI_TIMODE_DISABLE,
         .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
@@ -533,7 +533,7 @@ bool Encoder::abs_spi_start_transaction() {
             spi_task_.tx_buf = (uint8_t*)abs_spi_dma_tx_;
             spi_task_.rx_buf = (uint8_t*)abs_spi_dma_rx_;
             //CMR chage to 4 in order for 4 8 bit messages
-            spi_task_.length = 1;//change to 4 for 4 8 bit messages for arm
+            spi_task_.length = (mode_ = MODE_SPI_ARM)? 4 : 1;//change to 4 for 4 8 bit messages for arm
             spi_task_.on_complete = [](void* ctx, bool success) { ((Encoder*)ctx)->abs_spi_cb(success); };
             spi_task_.on_complete_ctx = this;
             spi_task_.next = nullptr;
