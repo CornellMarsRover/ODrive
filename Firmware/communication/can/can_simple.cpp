@@ -279,17 +279,32 @@ bool CANSimple::get_encoder_estimates_callback(const Axis& axis) {
 
     //change to CCB address
     //|priority|dest|type|source|function
-    txmsg.id = (axis.config_.can.node_id << NUM_CMD_ID_BITS);
-    txmsg.id = (0x03 << (NUM_CMD_ID_BITS + NUM_TYPE_ID_BITS));
-    txmsg.id += (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
-    txmsg.id += (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
-    txmsg.id += MSG_GET_ENCODER_ESTIMATES;  // heartbeat ID
+    txmsg.id = 0;
+
+    txmsg.id |= MSG_GET_ENCODER_ESTIMATES; 
+    txmsg.id |= (axis.config_.can.node_id << NUM_CMD_ID_BITS);
+    txmsg.id |= (0x03 << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS));
+    txmsg.id |= (CCB << (NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
+    txmsg.id |= (0x1 << (8 + NUM_CMD_ID_BITS + NUM_SRC_ID_BITS + NUM_TYPE_ID_BITS));
     txmsg.isExt = axis.config_.can.is_extended;
-    txmsg.len = 8;
+    txmsg.len = 2;//8;
 
-    can_setSignal<float>(txmsg, axis.encoder_.pos_estimate_.any().value_or(0.0f), 0, 32, true);
-    can_setSignal<float>(txmsg, axis.encoder_.vel_estimate_.any().value_or(0.0f), 32, 32, true);
+    // can_setSignal<float>(txmsg, axis.encoder_.pos_estimate_.any().value_or(0.0f), 0, 32, true);
+    // can_setSignal<float>(txmsg, axis.encoder_.vel_estimate_.any().value_or(0.0f), 32, 32, true);
 
+    float vel = axis.encoder_.vel_estimate_.any().value_or(0.0f);
+    int vel_int;
+    int pos = (int)axis.encoder_.pos_estimate_.any().value_or(0.0f);
+    if (vel < 0){
+        // vel = -1 * vel;
+        vel_int = (int)vel;
+        // vel_int = (0x1<<8) | vel_int;
+    }
+    else{
+        vel_int = (int)vel;
+    }
+    txmsg.buf[1] = vel_int;
+    txmsg.buf[0] = pos;
     return canbus_->send_message(txmsg);
 }
 
@@ -331,6 +346,7 @@ bool CANSimple::get_encoder_count_callback(const Axis& axis) {
 
     can_setSignal<int32_t>(txmsg, axis.encoder_.shadow_count_, 0, 32, true);
     can_setSignal<int32_t>(txmsg, axis.encoder_.count_in_cpr_, 32, 32, true);
+    
     return canbus_->send_message(txmsg);
 }
 
