@@ -127,11 +127,11 @@ static float limitVel(const float vel_limit, const float vel_estimate, const flo
 
 bool Controller::update() {
     std::optional<float> pos_estimate_linear = pos_estimate_linear_src_.present();
-    std::optional<float> pos_estimate_circular = pos_estimate_circular_src_.present();
+    std::optional<float> pos_estimate_circular = pos_estimate_circular_src_.present();//need to to add encoder control
     std::optional<float> pos_wrap = pos_wrap_src_.present();
     std::optional<float> vel_estimate = vel_estimate_src_.present();
 
-    std::optional<float> anticogging_pos_estimate = axis_->encoder_.pos_estimate_.present();
+    std::optional<float> anticogging_pos_estimate = axis_->encoder_.pos_estimate_.present();//maybe find actual position here
     std::optional<float> anticogging_vel_estimate = axis_->encoder_.vel_estimate_.present();
 
     if (axis_->step_dir_active_) {
@@ -292,7 +292,7 @@ bool Controller::update() {
             pos_err = pos_setpoint_ - *pos_estimate_linear;
         }
 
-        vel_des += config_.pos_gain * pos_err;
+        vel_des += config_.pos_gain * pos_err; // need to add sector to this CMR
         // V-shaped gain shedule based on position error
         float abs_pos_err = std::abs(pos_err);
         if (config_.enable_gain_scheduling && abs_pos_err <= config_.gain_scheduling_width) {
@@ -355,7 +355,7 @@ bool Controller::update() {
             return false;
         }
 
-        v_err = vel_des - *vel_estimate;
+        v_err = vel_des - *vel_estimate;//need to divide by gear ratio CMR
         torque += (vel_gain * gain_scheduling_multiplier) * v_err;
 
         // Velocity integral action before limiting
@@ -382,7 +382,6 @@ bool Controller::update() {
         limited = true;
         torque = -Tlim;
     }
-
     // Velocity integrator (behaviour dependent on limiting)
     if (config_.control_mode < CONTROL_MODE_VELOCITY_CONTROL) {
         // reset integral if not in use
